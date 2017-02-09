@@ -68,7 +68,7 @@ double psleep(double mean, int iterations){
 		double realSleep;
 		double convert = 1000000000.0; //conversion factor of 1 billion
 		realSleep = (sleep * convert);
-		std::cout << (realSleep*1000) << std::endl;
+		std::cout << (realSleep) << std::endl;
 		struct timespec req = {0};
 		double g = 500000000.0; //arbitrary number I used to test nanosleep(), has nothing to do with the program
 		req.tv_sec = 0;
@@ -106,7 +106,7 @@ double psleep(double mean, int iterations){
 		//outputs the time and how long the program slept
 		std::cout << hours.count() << ":"
         << minutes.count() << ":"
-        << seconds.count() << ":"
+        << seconds.count() << ":" 
         << nanoseconds.count() << ",  ";
 		std::cout << "sleep for: " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "nsec\n";
 	}	
