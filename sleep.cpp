@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <signal.h>
+#include <unistd.h>
 
 void random_seed(long int seed){
 	if (seed > 0){
@@ -57,20 +58,29 @@ double takeInput(){
 	
 	psleep(mean, iterations);
 }
-static void foo (int bar)
-{
-     /*some code here. In your case, nothing*/
-}
 
 double psleep(double mean, int iterations){
 	for (int i = 0; i < iterations; i++){
-		double sleep = random_exponential(mean);
-		double realSleep;
-		double convert = 1000000000.0; //conversion factor of 1 billion
-		realSleep = (sleep * convert);
-		std::cout << (realSleep) << std::endl;
+		double asleep = random_exponential(mean);
+		double realSleep, nsleep;
+		int wholeSeconds;
+		//ensures that no division by 0 happens
+		if (asleep < 1.0){
+			wholeSeconds = 0;
+			nsleep = asleep;
+		}
+		
+		else{
+			wholeSeconds = (int) asleep; //finds the whole seconds needed to sleep
+			nsleep = fmod (asleep,wholeSeconds); //finds the remaining fraction of a second
+		}
+	
+		realSleep = (nsleep * 1000000000.0); // ensures nsleep is always less than 1 billion which is the max parameter for nanosleep()
+		//std::cout << "real:" << (realSleep) << std::endl; //nanosecond sleep time for testing
+		//std::cout << "whole seconds:" << (wholeSeconds) << std::endl; //seconds sleep time for testing
+		
+		//struct used to set start and end times for nanosleep()
 		struct timespec req = {0};
-		double g = 500000000.0; //arbitrary number I used to test nanosleep(), has nothing to do with the program
 		req.tv_sec = 0;
 		req.tv_nsec = realSleep;
 		
@@ -83,13 +93,14 @@ double psleep(double mean, int iterations){
 		sigprocmask(SIG_SETMASK, &mask, NULL);
 		
 		//sleeps the program
+		sleep(wholeSeconds);
 		nanosleep(&req, (struct timespec *)NULL);
 		
 		//ends the timer that marks how the program sleeps
 		auto finish = std::chrono::high_resolution_clock::now();
-		std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
 		
 		//gets current time at nanosecond level in UTC
+		std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
 		auto duration = now.time_since_epoch();
 		typedef std::chrono::duration<int, std::ratio_multiply<std::chrono::hours::period, std::ratio<8>
 		>::type> Days; /* UTC: +8:00 */
@@ -109,7 +120,7 @@ double psleep(double mean, int iterations){
         << seconds.count() << ":" 
         << nanoseconds.count() << ",  ";
 		std::cout << "sleep for: " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "nsec\n";
-	}	
+	}
 }
 
 int main(){
