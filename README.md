@@ -1,1 +1,3 @@
-# 403-Project-2
+Command to compile this code
+
+g++ -lm  -std=c++11 sleep.cpp
